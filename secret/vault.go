@@ -9,7 +9,7 @@ import (
 	"strings"
 	"sync"
 
-	encrypt "github.com/radoslavboychev/gophercises-secret/cipher"
+	"github.com/radoslavboychev/gophercises-secret/encrypt"
 )
 
 // File creates a new instance of a Vault object
@@ -28,25 +28,32 @@ type Vault struct {
 	keyValues   map[string]string
 }
 
-// load opens
-func (v *Vault) load() error {
-	f, err := os.Open(v.filepath)
+// Get decrypts and returns a key from the vault
+func (v *Vault) Get(key string) (string, error) {
+	v.mutex.Lock()
+	defer v.mutex.Unlock()
+	err := v.loadKeyValues()
 	if err != nil {
-		v.keyValues = make(map[string]string)
-		return nil
+		return "", err
 	}
-	defer f.Close()
-	r, err := encrypt.DecryptReader(v.encodingKey, f)
+	value, ok := v.keyValues[key]
+	if !ok {
+		return "", errors.New("secret: no value for that key")
+	}
+	return value, nil
+}
+
+// Set sets the value of a key in the Vault, returns error if any
+func (v *Vault) Set(key, value string) error {
+	v.mutex.Lock()
+	defer v.mutex.Unlock()
+	err := v.loadKeyValues()
 	if err != nil {
 		return err
 	}
-	return v.readKeyValues(r)
-
-}
-
-func (v *Vault) readKeyValues(r io.Reader) error {
-	dec := json.NewDecoder(r)
-	return dec.Decode(&v.keyValues)
+	v.keyValues[key] = value
+	err = v.saveKeyValues()
+	return err
 }
 
 // loadKeyValues opens the file with the values, decrypts them and decodes
@@ -97,33 +104,4 @@ func (v *Vault) saveKeyValues() error {
 		return err
 	}
 	return nil
-}
-
-// Get decrypts and returns a key from the vault
-func (v *Vault) Get(key string) (string, error) {
-	v.mutex.Lock()
-	defer v.mutex.Unlock()
-	err := v.loadKeyValues()
-	if err != nil {
-		return "", err
-	}
-	value, ok := v.keyValues[key]
-	if !ok {
-		return "", errors.New("secret: no value for that key")
-	}
-	return value, nil
-}
-
-// Set sets the value of a key in the Vault, returns error if any
-func (v *Vault) Set(key, value string) error {
-	v.mutex.Lock()
-	defer v.mutex.Unlock()
-	err := v.loadKeyValues()
-	if err != nil {
-		return err
-	}
-	v.keyValues[key] = value
-	err = v.saveKeyValues()
-	return err
-
 }

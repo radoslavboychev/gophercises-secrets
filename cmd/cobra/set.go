@@ -7,6 +7,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// define the 'set' command
+// creates a new Vault,
+// invokes the Set() method for the vault
 var setCmd = &cobra.Command{
 	Use:   "set",
 	Short: "Sets a secret in your secret storage",

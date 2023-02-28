@@ -11,6 +11,8 @@ import (
 	"io"
 )
 
+// Encrypt creates a new cipher block
+// encrypts the block using the iv
 func Encrypt(key, plaintext string) (string, error) {
 	block, err := newCipherBlock(key)
 	if err != nil {
@@ -28,6 +30,8 @@ func Encrypt(key, plaintext string) (string, error) {
 	return fmt.Sprintf("%x", cipherText), nil
 }
 
+// Decrypt creates a new cipher block
+// decrypts the stream and returns the encrypted cipher as a string
 func Decrypt(key, cipherHex string) (string, error) {
 	block, err := newCipherBlock(key)
 	if err != nil {
@@ -57,7 +61,7 @@ func EncryptWriter(key string, w io.Writer) (*cipher.StreamWriter, error) {
 	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
 		return nil, err
 	}
-	
+
 	stream, err := encryptStream(key, iv)
 	if err != nil {
 		return nil, err
@@ -70,7 +74,7 @@ func EncryptWriter(key string, w io.Writer) (*cipher.StreamWriter, error) {
 	return &cipher.StreamWriter{S: stream, W: w}, nil
 }
 
-// DecryptReader() 
+// DecryptReader()
 func DecryptReader(key string, r io.Reader) (*cipher.StreamReader, error) {
 	iv := make([]byte, aes.BlockSize)
 	n, err := r.Read(iv)

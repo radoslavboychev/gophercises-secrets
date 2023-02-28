@@ -7,6 +7,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// define the 'get' console command
+// invokes the Get() command for the vault
 var getCmd = &cobra.Command{
 	Use:   "get",
 	Short: "Gets a secret in your secret storage",

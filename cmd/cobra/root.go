@@ -4,9 +4,9 @@ import (
 	"path/filepath"
 
 	"github.com/spf13/cobra"
-	homedir "github.com/mitchellh/go-homedir"
 )
 
+// 
 var RootCmd = &cobra.Command{
 	Use:   "secret",
 	Short: "Secret is an API key and other secrets manager",
@@ -19,6 +19,6 @@ func init() {
 }
 
 func secretsPath() string {
-	home, _ := homedir.Dir()
+	home := "/mnt/d/projects/go-gophercises/gophercises-secrets/"
 	return filepath.Join(home, ".secrets")
 }
